@@ -1,3 +1,4 @@
+const Person = require('./person');
 class Provider extends Person {
   constructor(fullName, age, address, servicesToProvide) {
     super(fullName, age, address);
@@ -19,3 +20,5 @@ class Provider extends Person {
     }
   }
 }
+
+module.exports = Provider;

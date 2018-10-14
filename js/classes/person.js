@@ -23,3 +23,5 @@ class Person {
         this._address = address;
     }
 }
+
+module.exports = Person;

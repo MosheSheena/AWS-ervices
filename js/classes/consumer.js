@@ -1,5 +1,4 @@
+const Person = require('./person');
 class Consumer extends Person {
-    constructor(fullName, age, address) {
-        super(fullName, age, address);
-    }
 }
+module.exports = Consumer;

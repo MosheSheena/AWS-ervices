@@ -13,3 +13,5 @@ class Service {
         this._cost = cost;
     }
 }
+
+module.exports = Service;

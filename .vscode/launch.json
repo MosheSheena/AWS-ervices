@@ -8,7 +8,35 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/js/dynamoDB/dynamo.js"
+            "program": "${workspaceFolder}/js/dynamoDB/test_dynamo.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Mocha All",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "--timeout",
+                "999999",
+                "--colors",
+                "'${workspaceFolder}/{,!(node_modules)/}*/*.test.js'"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Mocha Current File",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "--timeout",
+                "999999",
+                "--colors",
+                "${file}"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
         }
     ]
 }
