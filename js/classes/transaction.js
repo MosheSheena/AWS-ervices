@@ -16,7 +16,7 @@ class Transaction {
     return this._name;
   }
   get provider() {
-    return this.provider;
+    return this._provider;
   }
   sayHello() {
     console.log('Hello, my name is ' + this._name + ', I have ID: ' + this._id);

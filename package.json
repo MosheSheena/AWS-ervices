@@ -1,13 +1,15 @@
 {
-    "dependencies": {},
-    "name": "serve-me-up",
-    "description": "Trading services platform implemented with AWS",
-    "version": "1.0.1",
-    "main": "dynamo.js",
-    "devDependencies": {},
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "Amit",
-    "license": "ISC"
-  }
+  "dependencies": {
+    "deep-equal": "^1.0.1"
+  },
+  "name": "serve-me-up",
+  "description": "Trading services platform implemented with AWS",
+  "version": "1.0.1",
+  "main": "dynamo.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Amit",
+  "license": "ISC"
+}
