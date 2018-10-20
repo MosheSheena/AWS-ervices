@@ -5,6 +5,8 @@ class Transaction {
     this._title = title;
     this._provider = provider;
     this._consumers = consumers;
+    this._dateCreated = Date.now();
+    this._dateExecuted = null;
   }
   get id() {
     return this._id;
@@ -21,8 +23,18 @@ class Transaction {
   get consumers() {
     return this._consumers;
   }
-  sayHello() {
-    console.log('Hello, my name is ' + this._name + ', I have ID: ' + this._id);
+  execute() {
+    this._dateExecuted = Date.now();
+  }
+  toJSON() {
+    return {
+        id: this._id,
+        title: this._title,
+        provider: this._provider,
+        consumers: this._consumers,
+        dateCreated: this._dateCreated,
+        dateExecuted: this._dateExecuted
+    };
   }
 }
 

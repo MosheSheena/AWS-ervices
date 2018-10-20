@@ -19,6 +19,11 @@ class Provider extends Person {
       this._servicesToProvide.splice(index, 1);
     }
   }
+  toJSON() {
+    return {
+        servicesToProvide: this._servicesToProvide
+    };
+  }
 }
 
 module.exports = Provider;

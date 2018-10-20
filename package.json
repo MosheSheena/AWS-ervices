@@ -2,6 +2,7 @@
   "dependencies": {
     "aws-sdk": "^2.337.0",
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "deep-equal": "^1.0.1",
     "mocha": "^5.2.0",
     "uuid": "^3.3.2"

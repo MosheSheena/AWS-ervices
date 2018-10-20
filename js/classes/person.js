@@ -22,6 +22,13 @@ class Person {
     set address(address) {
         this._address = address;
     }
+    toJSON() {
+        return {
+            fullName: this._fullName,
+            age: this._age,
+            address: this._address
+        };
+      }
 }
 
 module.exports = Person;
