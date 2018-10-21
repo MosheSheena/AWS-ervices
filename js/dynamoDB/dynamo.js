@@ -11,10 +11,12 @@ function recordTransaction(transaction) {
   var params = {
     TableName: 'Transactions',
     Item: {
-      'transactionID': transaction.id,
+      'id': transaction.id,
       'title': transaction.title,
       'provider': transaction.provider,
-      'consumers': transaction.consumers
+      'consumers': transaction.consumers,
+      'dateCreated': transaction.dateCreated,
+      'dateExecuted': transaction.dateExecuted
     }
   };
 
@@ -33,9 +35,9 @@ function getTransactionByID(id) {
   var params = {
     TableName: 'Transactions',
     Key: {
-      'transactionID': id
+      'id': id
     },
-    ReturnValues: 'ALL_OLD'
+    ReturnValues: 'ALL_NEW'
   };
   var res = docClient.get(params, function (err, data) {
     if (err) {
@@ -52,7 +54,7 @@ function updateTransactionByID(id, title, provider, consumers) {
   var params = {
     TableName: 'Transactions',
     Key: {
-      'transactionID': id
+      'id': id
     },
     UpdateExpression: 'set title=:t, provider=:p, consumers=:c',
     ExpressionAttributeValues: {
@@ -60,7 +62,7 @@ function updateTransactionByID(id, title, provider, consumers) {
       ':p': provider,
       ':c': consumers
     },
-    ReturnValues: 'UPDATED_NEW'
+    ReturnValues: 'ALL_NEW'
   };
 
   var res = docClient.update(params, function (err, data) {
@@ -97,7 +99,7 @@ function getTransactionsByTitle(title) {
     ProjectionExpression: '#tid, title, provider, consumers',
     FilterExpression: 'title = :expect_title',
     ExpressionAttributeNames: {
-      '#tid': 'transacntionID'
+      '#tid': 'id'
     },
     ExpressionAttributeValues: {
       ':expect_title': title
