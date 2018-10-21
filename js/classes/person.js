@@ -8,7 +8,7 @@ class Person {
         return this._fullName;
     }
     set fullName(fullName) {
-        this._fullName = fullName.charAt(0).toUpperCase() + fullName.slice(1);
+        this._fullName = fullName;
     }
     get age() {
         return this._age;

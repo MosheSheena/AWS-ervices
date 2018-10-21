@@ -12,7 +12,7 @@ class Transaction {
     return this._id;
   }
   set title(title) {
-    this._title = title.charAt(0).toUpperCase() + title.slice(1);
+    this._title = title;
   }
   get title() {
     return this._title;
@@ -22,6 +22,12 @@ class Transaction {
   }
   get consumers() {
     return this._consumers;
+  }
+  get dateCreated() {
+    return this._dateCreated;
+  }
+  get dateExecuted() {
+    return this._dateExecuted;
   }
   execute() {
     this._dateExecuted = Date.now();
