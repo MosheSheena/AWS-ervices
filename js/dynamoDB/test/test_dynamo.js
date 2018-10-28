@@ -21,7 +21,6 @@ var consumers = [
 ]
 var transactionA = new Transaction('title1', provider, consumers);
 var transactionB = new Transaction('title1', provider, consumers);
-var transactionC = new Transaction('title2', provider, consumers);
 
 describe('test dynamo.js', function () {
 
@@ -45,32 +44,19 @@ describe('test dynamo.js', function () {
         return chai.expect(retrieved.Attributes).to.be.deep.equal(transaction.toJSON());
     });
 
-<<<<<<< HEAD
     it('should retrieve list of transactions depending on their name', async () => {
         var expectedTransactions = [
-=======
-    it('should retrieve list of transactions depeding on their name', async () => {
-        var expectedTranscations = [
->>>>>>> b15a12b1bda8cbf540993a014a99719f582371be
             transactionA.toJSON(),
             transactionB.toJSON()
         ]
 
-<<<<<<< HEAD
         expectedTransactions.forEach(async (tran) => {
-=======
-        expectedTranscations.forEach(async (tran) => {
->>>>>>> b15a12b1bda8cbf540993a014a99719f582371be
             await dynamo.recordTransaction(tran);
         });
 
-        var tByTitle = await dynamo.getTransactionsByTitle('title1');
+         var tByTitle = await dynamo.getTransactionsByTitle('title1');
 
-<<<<<<< HEAD
         return chai.expect(tByTitle.Items).to.include(expectedTransactions);
-=======
-        return chai.expect(tByTitle.Items).to.include(expectedTranscations);
->>>>>>> b15a12b1bda8cbf540993a014a99719f582371be
 
     });
 });

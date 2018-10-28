@@ -105,19 +105,13 @@ function getTransactionsByTitle(title) {
       ':expect_title': title
     }
   };
-
-  function onScan(err, data) {
+  var pageList = []
+  async function onScan(err, data) {
     if (err) {
       console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
     } else {
       console.log('Scan succeeded.');
-      data.Items.forEach(function (transaction) {
-        console.log(
-          transaction.id + ': ', transaction.title,
-          '- provider: ', transaction.provider,
-          '- consumers: ', transaction.consumers
-        );
-      });
+      pageList.concat(data.Items)
 
       /*
        * Continue scanning if we have more movies, because
@@ -126,13 +120,12 @@ function getTransactionsByTitle(title) {
       if (typeof data.LastEvaluatedKey != 'undefined') {
         console.log('Scanning for more...');
         params.ExclusiveStartKey = data.LastEvaluatedKey;
-        docClient.scan(params, onScan);
+        await docClient.scan(params, onScan);
       }
     }
   }
 
-  return docClient.scan(params, onScan);
-
+  return docClient.scan(params, onScan).promise();
 }
 
 exports.recordTransaction = recordTransaction;
