@@ -93,31 +93,19 @@ function deleteTransactionByID(id) {
   });
 }
 
-function getTransactionsByTitle(title) {
+function getAllTransactions() {
   var params = {
     TableName: 'Transactions',
     ProjectionExpression: '#tid, title, provider, consumers',
-    FilterExpression: 'title = :expect_title',
     ExpressionAttributeNames: {
       '#tid': 'id'
-    },
-    ExpressionAttributeValues: {
-      ':expect_title': title
     }
   };
-
   function onScan(err, data) {
     if (err) {
       console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
     } else {
       console.log('Scan succeeded.');
-      data.Items.forEach(function (transaction) {
-        console.log(
-          transaction.id + ': ', transaction.title,
-          '- provider: ', transaction.provider,
-          '- consumers: ', transaction.consumers
-        );
-      });
 
       /*
        * Continue scanning if we have more movies, because
@@ -132,7 +120,127 @@ function getTransactionsByTitle(title) {
   }
 
   return docClient.scan(params, onScan).promise();
+}
 
+function getTransactionsByTitle(title) {
+  var params = {
+    TableName: 'Transactions',
+    ProjectionExpression: '#tid, title, provider, consumers',
+    FilterExpression: 'title = :expect_title',
+    ExpressionAttributeNames: {
+      '#tid': 'id'
+    },
+    ExpressionAttributeValues: {
+      ':expect_title': title
+    }
+  };
+  function onScan(err, data) {
+    if (err) {
+      console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+      console.log('Scan succeeded.');
+
+      /*
+       * Continue scanning if we have more movies, because
+       * scan can retrieve a maximum of 1MB of data
+       */
+      if (typeof data.LastEvaluatedKey != 'undefined') {
+        console.log('Scanning for more...');
+        params.ExclusiveStartKey = data.LastEvaluatedKey;
+        docClient.scan(params, onScan);
+      }
+    }
+  }
+
+  return docClient.scan(params, onScan).promise();
+}
+
+function recordService(service) {
+
+  var params = {
+    TableName: 'Services',
+    Item: {
+      'id': service.id,
+      'description': service.description,
+      'cost': service.cost,
+      'provider': service.provider,
+      'timeToDeliver': service.timeToDeliver,
+      'quantity': service.quantity
+    }
+  };
+
+  var res = docClient.put(params, function (err, data) {
+    if (err) {
+      console.error('Unable to add transaction. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+      console.log('PutItem succeeded ', JSON.stringify(data));
+    }
+  }).promise();
+
+  return res;
+}
+
+function getAllServices() {
+  var params = {
+    TableName: 'Services',
+    ProjectionExpression: '#sid, description, cost, provider, timeToDeliver, quantity',
+    ExpressionAttributeNames: {
+      '#sid': 'id'
+    }
+  };
+  function onScan(err, data) {
+    if (err) {
+      console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+      console.log('Scan succeeded.');
+
+      /*
+       * Continue scanning if we have more movies, because
+       * scan can retrieve a maximum of 1MB of data
+       */
+      if (typeof data.LastEvaluatedKey != 'undefined') {
+        console.log('Scanning for more...');
+        params.ExclusiveStartKey = data.LastEvaluatedKey;
+        docClient.scan(params, onScan);
+      }
+    }
+  }
+
+  return docClient.scan(params, onScan).promise();
+}
+
+function getServicesForSell() {
+  var params = {
+    TableName: 'Services',
+    ProjectionExpression: '#sid, description, cost, provider, timeToDeliver, quantity',
+    FilterExpression: 'quantity >= :expect_quantity',
+    ExpressionAttributeNames: {
+      '#sid': 'id'
+    },
+    ExpressionAttributeValues: {
+      ':expect_quantity': 0
+    }
+  };
+
+  function onScan(err, data) {
+    if (err) {
+      console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+      console.log('Scan succeeded.');
+
+      /*
+       * Continue scanning if we have more movies, because
+       * scan can retrieve a maximum of 1MB of data
+       */
+      if (typeof data.LastEvaluatedKey != 'undefined') {
+        console.log('Scanning for more...');
+        params.ExclusiveStartKey = data.LastEvaluatedKey;
+        docClient.scan(params, onScan);
+      }
+    }
+  }
+
+  return docClient.scan(params, onScan).promise();
 }
 
 exports.recordTransaction = recordTransaction;
@@ -140,3 +248,7 @@ exports.getTransactionByID = getTransactionByID;
 exports.updateTransactionByID = updateTransactionByID;
 exports.deleteTransactionByID = deleteTransactionByID;
 exports.getTransactionsByTitle = getTransactionsByTitle;
+exports.getAllTransactions = getAllTransactions;
+exports.recordService = recordService;
+exports.getAllServices = getAllServices;
+exports.getServicesForSell = getServicesForSell;

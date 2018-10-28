@@ -8,57 +8,75 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 var service = new Service('bake bread', 59.6);
+
 var consumer = new Consumer('moshe', 24, 'rosh-ain');
+
 var provider = new Provider('amit', 21, 'address', [service]);
+
 
 var consumer1 = new Consumer('itay', 24, 'rosh-ain');
 var consumer2 = new Consumer('nadav', 24, 'rosh-ain');
 var consumer3 = new Consumer('sheena', 24, 'rosh-ain');
 var consumers = [
-    consumer1,
-    consumer2,
-    consumer3
+  consumer1,
+  consumer2,
+  consumer3
 ]
 var transactionA = new Transaction('title1', provider, consumers);
 var transactionB = new Transaction('title1', provider, consumers);
-var transactionC = new Transaction('title2', provider, consumers);
 
-describe('test dynamo.js', function () {
+describe('test transactions table', function () {
 
-    it('should store a record in DB and retrieve it by its ID', async () => {
-        var transaction = new Transaction('a_title', provider, [consumer]);
+  it('should store a record in DB and retrieve it by its ID', async () => {
+    var transaction = new Transaction('a_title', provider, [consumer]);
 
-        await dynamo.recordTransaction(transaction);
-        var retrieved = await dynamo.getTransactionByID(transaction.id);
+    await dynamo.recordTransaction(transaction);
+    var retrieved = await dynamo.getTransactionByID(transaction.id);
 
-        return chai.expect(retrieved.Item).to.be.deep.equal(transaction.toJSON());
+    return chai.expect(JSON.parse(JSON.stringify(retrieved.Item))).to.be.deep.equal(transaction.toJSON());
+  });
+
+  it('should update transaction values', async () => {
+    var transaction = new Transaction('a_title', provider, [consumer]);
+
+    transaction.title = 'updatable';
+    await dynamo.recordTransaction(transaction);
+    var retrieved = await dynamo.updateTransactionByID(transaction.id, 'after', provider, [consumer]);
+    transaction.title = 'after';
+
+    return chai.expect(retrieved.Attributes).to.be.deep.equal(transaction.toJSON());
+  });
+
+  it('should retrieve list of transactions depending on their name', async () => {
+    var expectedTransactions = [
+      transactionA.toJSON(),
+      transactionB.toJSON()
+    ]
+
+    await expectedTransactions.forEach(async (tran) => {
+      await dynamo.recordTransaction(tran);
     });
 
-    it('should update transaction values', async () => {
-        var transaction = new Transaction('a_title', provider, [consumer]);
+    var tByTitle = await dynamo.getTransactionsByTitle('title1');
 
-        transaction.title = 'updatable';
-        await dynamo.recordTransaction(transaction);
-        var retrieved = await dynamo.updateTransactionByID(transaction.id, 'after', provider, [consumer]);
-        transaction.title = 'after';
+    return chai.expect(tByTitle.Items).to.include(expectedTransactions);
 
-        return chai.expect(retrieved.Attributes).to.be.deep.equal(transaction.toJSON());
-    });
+  });
+});
 
-    it('should retrieve list of transactions depeding on their name', async () => {
-        var expectedTranscations = [
-            transactionA.toJSON(),
-            transactionB.toJSON()
-        ]
+describe('test services table', function() {
 
-        expectedTranscations.forEach(async (tran) => {
-            await dynamo.recordTransaction(tran);
-        });
+  var serviceA = new Service('bake bread', 50, provider, Date.now(), 5);
 
-        var tByTitle = await dynamo.getTransactionsByTitle('title1');
+  it('should retrieve sellable services', async () => {
+    await dynamo.recordService(serviceA);
+    var res = await dynamo.getServicesForSell();
 
-        return chai.expect(tByTitle.Items).to.include(expectedTranscations);
+    return chai.expect(res.Items).to.be.equal(serviceA);
+  });
 
-    });
+  it('should retrieve services that belong to a specific provider', async () => {
+
+  });
 });
 
