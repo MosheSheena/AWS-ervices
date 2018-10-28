@@ -20,9 +20,9 @@ class Provider extends Person {
     }
   }
   toJSON() {
-    return {
+    return Object.assign(super.toJSON(), {
         servicesToProvide: this._servicesToProvide
-    };
+    });
   }
 }
 

@@ -93,6 +93,35 @@ function deleteTransactionByID(id) {
   });
 }
 
+function getAllTransactions() {
+  var params = {
+    TableName: 'Transactions',
+    ProjectionExpression: '#tid, title, provider, consumers',
+    ExpressionAttributeNames: {
+      '#tid': 'id'
+    }
+  };
+  function onScan(err, data) {
+    if (err) {
+      console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+      console.log('Scan succeeded.');
+
+      /*
+       * Continue scanning if we have more movies, because
+       * scan can retrieve a maximum of 1MB of data
+       */
+      if (typeof data.LastEvaluatedKey != 'undefined') {
+        console.log('Scanning for more...');
+        params.ExclusiveStartKey = data.LastEvaluatedKey;
+        docClient.scan(params, onScan);
+      }
+    }
+  }
+
+  return docClient.scan(params, onScan).promise();
+}
+
 function getTransactionsByTitle(title) {
   var params = {
     TableName: 'Transactions',
@@ -105,13 +134,11 @@ function getTransactionsByTitle(title) {
       ':expect_title': title
     }
   };
-  var pageList = []
-  async function onScan(err, data) {
+  function onScan(err, data) {
     if (err) {
       console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
     } else {
       console.log('Scan succeeded.');
-      pageList.concat(data.Items)
 
       /*
        * Continue scanning if we have more movies, because
@@ -120,7 +147,95 @@ function getTransactionsByTitle(title) {
       if (typeof data.LastEvaluatedKey != 'undefined') {
         console.log('Scanning for more...');
         params.ExclusiveStartKey = data.LastEvaluatedKey;
-        await docClient.scan(params, onScan);
+        docClient.scan(params, onScan);
+      }
+    }
+  }
+
+  return docClient.scan(params, onScan).promise();
+}
+
+function recordService(service) {
+
+  var params = {
+    TableName: 'Services',
+    Item: {
+      'id': service.id,
+      'description': service.description,
+      'cost': service.cost,
+      'provider': service.provider,
+      'timeToDeliver': service.timeToDeliver,
+      'quantity': service.quantity
+    }
+  };
+
+  var res = docClient.put(params, function (err, data) {
+    if (err) {
+      console.error('Unable to add transaction. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+      console.log('PutItem succeeded ', JSON.stringify(data));
+    }
+  }).promise();
+
+  return res;
+}
+
+function getAllServices() {
+  var params = {
+    TableName: 'Services',
+    ProjectionExpression: '#sid, description, cost, provider, timeToDeliver, quantity',
+    ExpressionAttributeNames: {
+      '#sid': 'id'
+    }
+  };
+  function onScan(err, data) {
+    if (err) {
+      console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+      console.log('Scan succeeded.');
+
+      /*
+       * Continue scanning if we have more movies, because
+       * scan can retrieve a maximum of 1MB of data
+       */
+      if (typeof data.LastEvaluatedKey != 'undefined') {
+        console.log('Scanning for more...');
+        params.ExclusiveStartKey = data.LastEvaluatedKey;
+        docClient.scan(params, onScan);
+      }
+    }
+  }
+
+  return docClient.scan(params, onScan).promise();
+}
+
+function getServicesForSell() {
+  var params = {
+    TableName: 'Services',
+    ProjectionExpression: '#sid, description, cost, provider, timeToDeliver, quantity',
+    FilterExpression: 'quantity >= :expect_quantity',
+    ExpressionAttributeNames: {
+      '#sid': 'id'
+    },
+    ExpressionAttributeValues: {
+      ':expect_quantity': 0
+    }
+  };
+
+  function onScan(err, data) {
+    if (err) {
+      console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+      console.log('Scan succeeded.');
+
+      /*
+       * Continue scanning if we have more movies, because
+       * scan can retrieve a maximum of 1MB of data
+       */
+      if (typeof data.LastEvaluatedKey != 'undefined') {
+        console.log('Scanning for more...');
+        params.ExclusiveStartKey = data.LastEvaluatedKey;
+        docClient.scan(params, onScan);
       }
     }
   }
@@ -133,3 +248,7 @@ exports.getTransactionByID = getTransactionByID;
 exports.updateTransactionByID = updateTransactionByID;
 exports.deleteTransactionByID = deleteTransactionByID;
 exports.getTransactionsByTitle = getTransactionsByTitle;
+exports.getAllTransactions = getAllTransactions;
+exports.recordService = recordService;
+exports.getAllServices = getAllServices;
+exports.getServicesForSell = getServicesForSell;

@@ -36,8 +36,8 @@ class Transaction {
     return {
         id: this._id,
         title: this._title,
-        provider: this._provider,
-        consumers: this._consumers,
+        provider: this._provider.toJSON(),
+        consumers: JSON.parse(JSON.stringify(this._consumers)),
         dateCreated: this._dateCreated,
         dateExecuted: this._dateExecuted
     };
