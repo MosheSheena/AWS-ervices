@@ -1,7 +1,7 @@
 const Person = require('./person');
 class Provider extends Person {
-  constructor(fullName, age, address, servicesToProvide) {
-    super(fullName, age, address);
+  constructor(id, fullName, age, address, servicesToProvide) {
+    super(id, fullName, age, address);
     this._servicesToProvide = servicesToProvide;
   }
   get servicesToProvide() {

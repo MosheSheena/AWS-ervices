@@ -1,10 +1,10 @@
 const uuid = require('uuid');
 class Service {
-  constructor(name, cost, provider, timeToDeliver, quantity) {
+  constructor(name, cost, providerId, timeToDeliver, quantity) {
     this._id = uuid.v1();
     this._description = name;
     this._cost = cost;
-    this._provider = provider;
+    this._providerId = providerId;
     this._timeToDeliver = timeToDeliver; //Date object
     this._quantity = quantity;
   }
@@ -20,8 +20,8 @@ class Service {
   set cost(cost) {
     this._cost = cost;
   }
-  get provider() {
-    return this._provider;
+  get providerId() {
+    return this._providerId;
   }
   get timeToDeliver() {
     return this._timeToDeliver;
@@ -51,7 +51,7 @@ class Service {
       id: this._id,
       description: this._description,
       cost: this._cost,
-      provider: this._provider.toJSON(),
+      provider: this._providerId,
       timeToDeliver: this._timeToDeliver,
       quantity: this._quantity
     };
