@@ -6,6 +6,24 @@ AWS.config.update({
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 
+function onScan(err, data) {
+  if (err) {
+    console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
+  } else {
+    console.log('Scan succeeded.');
+
+    /*
+     * Continue scanning if we have more movies, because
+     * scan can retrieve a maximum of 1MB of data
+     */
+    if (typeof data.LastEvaluatedKey != 'undefined') {
+      console.log('Scanning for more...');
+      params.ExclusiveStartKey = data.LastEvaluatedKey;
+      docClient.scan(params, onScan);
+    }
+  }
+}
+
 function recordTransaction(transaction) {
 
   var params = {
@@ -101,23 +119,6 @@ function getAllTransactions() {
       '#tid': 'id'
     }
   };
-  function onScan(err, data) {
-    if (err) {
-      console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
-    } else {
-      console.log('Scan succeeded.');
-
-      /*
-       * Continue scanning if we have more movies, because
-       * scan can retrieve a maximum of 1MB of data
-       */
-      if (typeof data.LastEvaluatedKey != 'undefined') {
-        console.log('Scanning for more...');
-        params.ExclusiveStartKey = data.LastEvaluatedKey;
-        docClient.scan(params, onScan);
-      }
-    }
-  }
 
   return docClient.scan(params, onScan).promise();
 }
@@ -134,23 +135,6 @@ function getTransactionsByTitle(title) {
       ':expect_title': title
     }
   };
-  function onScan(err, data) {
-    if (err) {
-      console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
-    } else {
-      console.log('Scan succeeded.');
-
-      /*
-       * Continue scanning if we have more movies, because
-       * scan can retrieve a maximum of 1MB of data
-       */
-      if (typeof data.LastEvaluatedKey != 'undefined') {
-        console.log('Scanning for more...');
-        params.ExclusiveStartKey = data.LastEvaluatedKey;
-        docClient.scan(params, onScan);
-      }
-    }
-  }
 
   return docClient.scan(params, onScan).promise();
 }
@@ -163,7 +147,7 @@ function recordService(service) {
       'id': service.id,
       'description': service.description,
       'cost': service.cost,
-      'provider': service.provider,
+      'providerId': service.providerId,
       'timeToDeliver': service.timeToDeliver,
       'quantity': service.quantity
     }
@@ -188,23 +172,6 @@ function getAllServices() {
       '#sid': 'id'
     }
   };
-  function onScan(err, data) {
-    if (err) {
-      console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
-    } else {
-      console.log('Scan succeeded.');
-
-      /*
-       * Continue scanning if we have more movies, because
-       * scan can retrieve a maximum of 1MB of data
-       */
-      if (typeof data.LastEvaluatedKey != 'undefined') {
-        console.log('Scanning for more...');
-        params.ExclusiveStartKey = data.LastEvaluatedKey;
-        docClient.scan(params, onScan);
-      }
-    }
-  }
 
   return docClient.scan(params, onScan).promise();
 }
@@ -222,23 +189,21 @@ function getServicesForSell() {
     }
   };
 
-  function onScan(err, data) {
-    if (err) {
-      console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
-    } else {
-      console.log('Scan succeeded.');
+  return docClient.scan(params, onScan).promise();
+}
 
-      /*
-       * Continue scanning if we have more movies, because
-       * scan can retrieve a maximum of 1MB of data
-       */
-      if (typeof data.LastEvaluatedKey != 'undefined') {
-        console.log('Scanning for more...');
-        params.ExclusiveStartKey = data.LastEvaluatedKey;
-        docClient.scan(params, onScan);
-      }
+function getProviderServices(providerId) {
+  var params = {
+    TableName: 'Services',
+    ProjectionExpression: '#sid, description, cost, providerId, timeToDeliver, quantity',
+    FilterExpression: 'providerId = :expect_provider',
+    ExpressionAttributeNames: {
+      '#sid': 'id'
+    },
+    ExpressionAttributeValues: {
+      ':expect_provider': providerId
     }
-  }
+  };
 
   return docClient.scan(params, onScan).promise();
 }
@@ -252,3 +217,4 @@ exports.getAllTransactions = getAllTransactions;
 exports.recordService = recordService;
 exports.getAllServices = getAllServices;
 exports.getServicesForSell = getServicesForSell;
+exports.getProviderServices = getProviderServices;

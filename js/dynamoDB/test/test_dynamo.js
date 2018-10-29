@@ -7,26 +7,31 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-var service = new Service('bake bread', 59.6);
+var today = new Date();
+var tomorrow = new Date(today.getTime() + (24 * 60 * 60 * 1000));
 
-var consumer = new Consumer('moshe', 24, 'rosh-ain');
+var consumer = new Consumer(4215, 'moshe', 24, 'rosh-ain');
 
-var provider = new Provider('amit', 21, 'address', [service]);
+var provider = new Provider(32432, 'amit', 21, 'address', [service]);
 
-
-var consumer1 = new Consumer('itay', 24, 'rosh-ain');
-var consumer2 = new Consumer('nadav', 24, 'rosh-ain');
-var consumer3 = new Consumer('sheena', 24, 'rosh-ain');
+var consumer1 = new Consumer(9654, 'itay', 24, 'rosh-ain');
+var consumer2 = new Consumer(3453, 'nadav', 24, 'rosh-ain');
+var consumer3 = new Consumer(3256, 'sheena', 24, 'rosh-ain');
 var consumers = [
   consumer1,
   consumer2,
   consumer3
 ]
+
+var service = new Service('bake bread', 59.6, provider.id, tomorrow.toDateString(), 3);
+var serviceA = new Service('train things', 50, provider.id, tomorrow.toDateString(), 5);
+
 var transactionA = new Transaction('title1', provider, consumers);
 var transactionB = new Transaction('title1', provider, consumers);
 
-describe('test transactions table', function () {
 
+describe('test transactions table', function () {
+ 
   it('should store a record in DB and retrieve it by its ID', async () => {
     var transaction = new Transaction('a_title', provider, [consumer]);
 
@@ -66,8 +71,6 @@ describe('test transactions table', function () {
 
 describe('test services table', function() {
 
-  var serviceA = new Service('bake bread', 50, provider, Date.now(), 5);
-
   it('should retrieve sellable services', async () => {
     await dynamo.recordService(serviceA);
     var res = await dynamo.getServicesForSell();
@@ -76,7 +79,14 @@ describe('test services table', function() {
   });
 
   it('should retrieve services that belong to a specific provider', async () => {
+    var expectedServices = [
+        service,
+        serviceA
+    ];
+    await dynamo.recordService(service);
+    var res = await dynamo.getProviderServices(provider.id);
 
+    return chai.expect(res.Items).to.be.equal(expectedServices);
   });
 });
 
