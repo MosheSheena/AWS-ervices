@@ -16,18 +16,12 @@ var provider = new Provider(32432, 'amit', 21, 'address', [service]);
 
 var consumer1 = new Consumer(9654, 'itay', 24, 'rosh-ain');
 var consumer2 = new Consumer(3453, 'nadav', 24, 'rosh-ain');
-var consumer3 = new Consumer(3256, 'sheena', 24, 'rosh-ain');
-var consumers = [
-  consumer1,
-  consumer2,
-  consumer3
-]
 
 var service = new Service('bake bread', 59.6, provider.id, tomorrow.toDateString(), 3);
 var serviceA = new Service('train things', 50, provider.id, tomorrow.toDateString(), 5);
 
-var transactionA = new Transaction('title1', provider, consumers);
-var transactionB = new Transaction('title1', provider, consumers);
+var transactionA = new Transaction('title1', provider, consumer1);
+var transactionB = new Transaction('title1', provider, consumer2);
 
 
 describe('test transactions table', function () {

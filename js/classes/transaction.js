@@ -1,10 +1,10 @@
 const uuid = require('uuid');
 class Transaction {
-  constructor(title, provider, consumers) {
+  constructor(title, provider, consumer) {
     this._id = uuid.v1();
     this._title = title;
     this._provider = provider;
-    this._consumers = consumers;
+    this._consumers = consumer;
     this._dateCreated = Date.now();
     this._dateExecuted = null;
   }
