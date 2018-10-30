@@ -1,5 +1,6 @@
 const uuid = require('uuid');
 
+<<<<<<< HEAD
 /**
  * Class representing a successful transaction between a provider
  * and a consumer.
@@ -13,27 +14,42 @@ class Transaction {
     this._title = title;
     this._provider = provider;
     this._consumers = consumer;
+=======
+class Transaction {
+  constructor(title, provider, consumer) {
+
+    this._id = uuid.v1();
+    this._title = title;
+    this._provider = provider;
+    this._consumer = consumer;
+>>>>>>> [WIP] Adding lambda functions for business logic
     this._dateCreated = Date.now();
-    this._dateExecuted = null;
   }
+
   get id() {
     return this._id;
   }
+
   set title(title) {
     this._title = title;
   }
+
   get title() {
     return this._title;
   }
+
   get provider() {
     return this._provider;
   }
-  get consumers() {
-    return this._consumers;
+
+  get consumer() {
+    return this._consumer;
   }
+
   get dateCreated() {
     return this._dateCreated;
   }
+<<<<<<< HEAD
   get dateExecuted() {
     return this._dateExecuted;
   }
@@ -61,6 +77,8 @@ class Transaction {
         dateExecuted: this._dateExecuted
     };
   }
+=======
+>>>>>>> [WIP] Adding lambda functions for business logic
 }
 
 module.exports = Transaction;

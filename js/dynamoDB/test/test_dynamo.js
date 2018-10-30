@@ -1,8 +1,8 @@
 const dynamo = require('../dynamo');
 const Transaction = require('../../classes/transaction');
-const Provider = require('../../classes/provider');
-const Service = require('../../classes/service');
-const Consumer = require('../../classes/consumer');
+const Provider = require('../../classes/seller');
+const Service = require('../../classes/item');
+const Person = require('../../classes/person');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
@@ -10,12 +10,23 @@ chai.use(chaiAsPromised);
 var today = new Date();
 var tomorrow = new Date(today.getTime() + (24 * 60 * 60 * 1000));
 
-var consumer = new Consumer(4215, 'moshe', 24, 'rosh-ain');
+var consumer = new Person(4215, 'moshe', 24, 'rosh-ain');
 
 var provider = new Provider(32432, 'amit', 21, 'address');
 
+<<<<<<< HEAD
 var consumer1 = new Consumer(9654, 'itay', 24, 'rosh-ain');
 var consumer2 = new Consumer(3453, 'nadav', 24, 'rosh-ain');
+=======
+var consumer1 = new Person(9654, 'itay', 24, 'rosh-ain');
+var consumer2 = new Person(3453, 'nadav', 24, 'rosh-ain');
+var consumer3 = new Person(3256, 'sheena', 24, 'rosh-ain');
+var consumers = [
+  consumer1,
+  consumer2,
+  consumer3
+]
+>>>>>>> [WIP] Adding lambda functions for business logic
 
 var service = new Service('bake bread', 59.6, provider.id, tomorrow.toDateString(), 3);
 var serviceA = new Service('train things', 50, provider.id, tomorrow.toDateString(), 5);
