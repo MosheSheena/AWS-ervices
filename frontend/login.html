@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>log-in</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/baguetteBox.min.css">
+    <link rel="stylesheet" href="css/smoothproducts.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,700i,600,600i">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.4.1/css/simple-line-icons.min.css">
+	<!-- Javascript SDKs-->
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="js/amazon-cognito-auth.min.js"></script>
+	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min.js"></script>
+	<script src="js/amazon-cognito-identity.min.js"></script>
+	<script src="js/config.js"></script>
+
+  </head>
+  <body>
+
+    <!--header-->
+    <nav class="navbar navbar-light navbar-expand-lg fixed-top bg-white clean-navbar">
+      <div class="container"><a class="navbar-brand logo" href="#">Aws project</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse"
+          id="navcol-1">
+            <ul class="nav navbar-nav ml-auto">
+            <li class="nav-item" role="presentation"><a class="nav-link" href="index.html">Home</a></li>
+          </div>
+        </div>
+      </nav>
+
+      <section class="clean-block clean-form dark">
+          <div class="container">
+              <div class="block-heading">
+                  <h2 class="text-info">Log In</h2>
+              </div>
+              <form>
+                <!--  <div class="form-group"><label for="email">Email</label><input class="form-control item" type="text" id="email"></div> -->
+                  <div class="form-group"><label for="username">Email</label><input class="form-control" type="text" id="inputUsername"></div>
+                  <div class="form-group"><label for="password">Password</label><input class="form-control" type="password" id="inputPassword"></div>
+                  <div class="form-group">
+                  </div><button class="btn btn-primary btn-block" type="button" onclick="signInButton()" href="product-page.html">Log In</button></form>
+          </div>
+      </section>
+
+
+<script>
+
+  function signInButton() {
+
+	var authenticationData = {
+        Username : document.getElementById("inputUsername").value,
+        Password : document.getElementById("inputPassword").value,
+    };
+
+    var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+
+	var poolData = {
+        UserPoolId : _config.cognito.userPoolId, // Your user pool id here
+        ClientId : _config.cognito.clientId, // Your client id here
+    };
+
+    var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+
+    var userData = {
+        Username : document.getElementById("inputUsername").value,
+        Pool : userPool,
+    };
+
+    var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+
+	cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: function (result) {
+			var accessToken = result.getAccessToken().getJwtToken();
+			console.log(accessToken);
+      	window.open("product-page.html");
+        },
+
+        onFailure: function(err) {
+            alert(err.message || JSON.stringify(err));
+        },
+    });
+  }
+</script>
+</body>
+</html>
