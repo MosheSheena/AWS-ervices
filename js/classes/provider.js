@@ -1,5 +1,15 @@
 const Person = require('./person');
 class Provider extends Person {
+
+  /**
+   * Class representing the provider of service, the one who
+   * sells the service and offers it to consumers.
+   * @param {Integer} id - passed to Parent class
+   * @param {String} fullName - passed to Parent class
+   * @param {Integer} age - passed to Parent class
+   * @param {String} address - passed to Parent class
+   * @param {Array.<Service>} servicesToProvide - array of service this provider is willing to offer.
+   */
   constructor(id, fullName, age, address, servicesToProvide) {
     super(id, fullName, age, address);
     this._servicesToProvide = servicesToProvide;
