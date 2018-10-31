@@ -6,6 +6,12 @@ AWS.config.update({
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 
+/**
+ * Callback for scanning the DB.
+ * @param {Object} err - error object
+ * @param {Object} data - response data containing the Items we scanned for.
+ * @returns {undefined}
+ */
 function onScan(err, data) {
   if (err) {
     console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
@@ -24,6 +30,11 @@ function onScan(err, data) {
   }
 }
 
+/**
+ * Stores a transaction to DB
+ * @param {Transaction} transaction - the transaction to store in DB
+ * @returns {Promise} a promise that can be hooked with a callback to perform operations when call is done
+ */
 function recordTransaction(transaction) {
 
   var params = {
@@ -49,6 +60,11 @@ function recordTransaction(transaction) {
   return res;
 }
 
+/**
+ * Fetch a transaction from the DB by it's id
+ * @param {UUID} id - the uuid of the transaction
+ * @returns {Promise} a promise that it's callback contains the transaction or any error if happen
+ */
 function getTransactionByID(id) {
   var params = {
     TableName: 'Transactions',
@@ -68,17 +84,25 @@ function getTransactionByID(id) {
   return res;
 }
 
-function updateTransactionByID(id, title, provider, consumers) {
+/**
+ * Update transaction details in DB
+ * @param {UUID} id - the uuid of the transaction
+ * @param {String} title - as defined in the Transaction class
+ * @param {Provider} provider - as defined in the Transaction class
+ * @param {Consumer} consumer - as defined in the Transaction class
+ * @returns {Promise} that can be hooked when we get a response from AWS
+ */
+function updateTransactionByID(id, title, provider, consumer) {
   var params = {
     TableName: 'Transactions',
     Key: {
       'id': id
     },
-    UpdateExpression: 'set title=:t, provider=:p, consumers=:c',
+    UpdateExpression: 'set title=:t, provider=:p, consumer=:c',
     ExpressionAttributeValues: {
       ':t': title,
       ':p': provider,
-      ':c': consumers
+      ':c': consumer
     },
     ReturnValues: 'ALL_NEW'
   };
@@ -94,6 +118,11 @@ function updateTransactionByID(id, title, provider, consumers) {
   return res;
 }
 
+/**
+ * Deletes a transaction from DB
+ * @param {UUID} id - uuid of the transaction
+ * @returns {Promise} that can be hooked with a callback to perform operations when we get the response from AWS
+ */
 function deleteTransactionByID(id) {
   var params = {
     TableName: 'Transactions',
@@ -108,9 +137,13 @@ function deleteTransactionByID(id) {
     } else {
       console.log('DeleteItem succeeded:', JSON.stringify(data, null, 2));
     }
-  });
+  }).promise();
 }
 
+/**
+ * Retrieves all the transaction for DB
+ * @returns {Promise} that will contain an array with all transactions
+ */
 function getAllTransactions() {
   var params = {
     TableName: 'Transactions',
@@ -123,6 +156,11 @@ function getAllTransactions() {
   return docClient.scan(params, onScan).promise();
 }
 
+/**
+ * Retrieves all transactions that their description matches
+ * @param {String} title - as defined in Transaction class
+ * @returns {Promise} that will contain an array with the matched transactions
+ */
 function getTransactionsByTitle(title) {
   var params = {
     TableName: 'Transactions',
@@ -139,6 +177,11 @@ function getTransactionsByTitle(title) {
   return docClient.scan(params, onScan).promise();
 }
 
+/**
+ * Stores a service to DB
+ * @param {Service} service - Service object to record
+ * @returns {Promise} that holds the result of the operation
+ */
 function recordService(service) {
 
   var params = {
@@ -164,6 +207,10 @@ function recordService(service) {
   return res;
 }
 
+/**
+ * Retrieves all services from DB
+ * @returns {Promise} containing all Services
+ */
 function getAllServices() {
   var params = {
     TableName: 'Services',
@@ -176,6 +223,11 @@ function getAllServices() {
   return docClient.scan(params, onScan).promise();
 }
 
+/**
+ * Retrieves all services that still have quantity, meaning they are still
+ * serviceable
+ * @returns {Promise} containing the desired data of the query
+ */
 function getServicesForSell() {
   var params = {
     TableName: 'Services',
@@ -192,6 +244,11 @@ function getServicesForSell() {
   return docClient.scan(params, onScan).promise();
 }
 
+/**
+ * Retrieves all services that are provided by a specific provider
+ * @param {Integer} providerId - provider's Id
+ * @returns {Promise} containing all services that a provider has to offer
+ */
 function getProviderServices(providerId) {
   var params = {
     TableName: 'Services',

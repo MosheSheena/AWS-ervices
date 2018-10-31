@@ -1,4 +1,11 @@
 class Person {
+
+    /**
+     * @param {Integer} id - id of the person
+     * @param {String} fullName - full name of person
+     * @param {Integer} age - age of person
+     * @param {String} address - address of person
+     */
     constructor(id, fullName, age, address) {
         this._id = id;
         this._fullName = fullName;

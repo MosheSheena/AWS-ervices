@@ -1,10 +1,18 @@
 const uuid = require('uuid');
+
+/**
+ * Class representing a successful transaction between a provider
+ * and a consumer.
+ * @param {String} title - a title describing the transaction
+ * @param {Provider} provider - object containing provider data
+ * @param {Consumer} consumer - object containing consumer data
+ */
 class Transaction {
-  constructor(title, provider, consumers) {
+  constructor(title, provider, consumer) {
     this._id = uuid.v1();
     this._title = title;
     this._provider = provider;
-    this._consumers = consumers;
+    this._consumers = consumer;
     this._dateCreated = Date.now();
     this._dateExecuted = null;
   }
@@ -29,8 +37,19 @@ class Transaction {
   get dateExecuted() {
     return this._dateExecuted;
   }
+  /**
+   * Completed the agreed transaction between the provider and
+   * the consumer
+   * @returns {Boolean} indicating the success of the operation
+   */
   execute() {
-    this._dateExecuted = Date.now();
+    if (this._dateExecuted !== null) {
+      this._dateExecuted = Date.now();
+
+      return true;
+    }
+
+    return false;
   }
   toJSON() {
     return {
