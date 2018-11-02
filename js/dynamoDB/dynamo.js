@@ -43,7 +43,7 @@ function recordTransaction(transaction) {
       'id': transaction.id,
       'title': transaction.title,
       'provider': transaction.provider,
-      'consumers': transaction.consumers,
+      'consumer': transaction.consumer,
       'dateCreated': transaction.dateCreated,
       'dateExecuted': transaction.dateExecuted
     }
@@ -147,7 +147,7 @@ function deleteTransactionByID(id) {
 function getAllTransactions() {
   var params = {
     TableName: 'Transactions',
-    ProjectionExpression: '#tid, title, provider, consumers',
+    ProjectionExpression: '#tid, title, provider, consumer',
     ExpressionAttributeNames: {
       '#tid': 'id'
     }
@@ -164,7 +164,7 @@ function getAllTransactions() {
 function getTransactionsByTitle(title) {
   var params = {
     TableName: 'Transactions',
-    ProjectionExpression: '#tid, title, provider, consumers',
+    ProjectionExpression: '#tid, title, provider, consumer',
     FilterExpression: 'title = :expect_title',
     ExpressionAttributeNames: {
       '#tid': 'id'
@@ -208,6 +208,30 @@ function recordService(service) {
 }
 
 /**
+ * Fetch a service from the DB by it's id
+ * @param {UUID} id - the uuid of the service
+ * @returns {Promise} a promise that it's callback contains the service or any error if happen
+ */
+function getServiceByID(id) {
+  var params = {
+    TableName: 'Services',
+    Key: {
+      'id': id
+    },
+    ReturnValues: 'ALL_NEW'
+  };
+  var res = docClient.get(params, function (err, data) {
+    if (err) {
+      console.error('Unable to read item. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+      console.log('GetItem succeeded:', JSON.stringify(data, null, 2));
+    }
+  }).promise();
+
+  return res;
+}
+
+/**
  * Retrieves all services from DB
  * @returns {Promise} containing all Services
  */
@@ -232,7 +256,7 @@ function getServicesForSell() {
   var params = {
     TableName: 'Services',
     ProjectionExpression: '#sid, description, cost, provider, timeToDeliver, quantity',
-    FilterExpression: 'quantity >= :expect_quantity',
+    FilterExpression: 'quantity > :expect_quantity',
     ExpressionAttributeNames: {
       '#sid': 'id'
     },
@@ -265,6 +289,64 @@ function getProviderServices(providerId) {
   return docClient.scan(params, onScan).promise();
 }
 
+/**
+ * Update service details in DB
+ * @param {UUID} id - the uuid of the service
+ * @param {String} name - as defined in the Service class
+ * @param {Integer} providerId - as defined in the Service class
+ * @param {Consumer} timeToDeliver - as defined in the Service class
+ * @param {Integer} quantity - as defined in the Service class
+ * @returns {Promise} that can be hooked when we get a response from AWS
+ */
+function updateServiceByID(id, description, providerId, timeToDeliver, quantity) {
+  var params = {
+    TableName: 'Services',
+    Key: {
+      'id': id
+    },
+    UpdateExpression: 'set description = :d, providerId = :p, timeToDeliver = :t, quantity = :q',
+    ExpressionAttributeValues: {
+      ':d': description,
+      ':p': providerId,
+      ':t': timeToDeliver,
+      ':q': quantity
+    },
+    ReturnValues: 'ALL_NEW'
+  };
+
+  var res = docClient.update(params, function (err, data) {
+    if (err) {
+      console.error('Unable to update item. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+      console.log('UpdateItem succeeded:', JSON.stringify(data, null, 2));
+    }
+  }).promise();
+
+  return res;
+}
+
+/**
+ * Get service quantity from DB
+ * @param {UUID} serviceId - the uuid of the service
+ * @returns {Integer} quantity available of that service
+ */
+async function getServiceQuantity(serviceId) {
+  var s = await getServiceByID(serviceId);
+
+  return s.Item.quantity;
+}
+
+/**
+ * Update service quantity
+ * @param {Service} service - the service to update its quantity
+ * @param {Integer} quantity - new quantity that the service will have in DB
+ * @returns {Promise} hookable callback to the operation
+ */
+function updateServiceQuantity(service, quantity) {
+
+  return updateServiceByID(service.id, service.description, service.providerId, service.timeToDeliver, quantity)
+}
+
 exports.recordTransaction = recordTransaction;
 exports.getTransactionByID = getTransactionByID;
 exports.updateTransactionByID = updateTransactionByID;
@@ -272,6 +354,10 @@ exports.deleteTransactionByID = deleteTransactionByID;
 exports.getTransactionsByTitle = getTransactionsByTitle;
 exports.getAllTransactions = getAllTransactions;
 exports.recordService = recordService;
+exports.getServiceByID = getServiceByID;
 exports.getAllServices = getAllServices;
 exports.getServicesForSell = getServicesForSell;
 exports.getProviderServices = getProviderServices;
+exports.updateServiceByID = updateServiceByID;
+exports.getServiceQuantity = getServiceQuantity;
+exports.updateServiceQuantity = updateServiceQuantity;
