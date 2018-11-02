@@ -10,9 +10,9 @@ class Provider extends Person {
    * @param {String} address - passed to Parent class
    * @param {Array.<Service>} servicesToProvide - array of service this provider is willing to offer.
    */
-  constructor(id, fullName, age, address, servicesToProvide) {
+  constructor(id, fullName, age, address) {
     super(id, fullName, age, address);
-    this._servicesToProvide = servicesToProvide;
+    this._servicesToProvide = [];
   }
   get servicesToProvide() {
     return new Array(this._servicesToProvide);
