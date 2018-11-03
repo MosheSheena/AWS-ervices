@@ -15,9 +15,12 @@ var consumer = new Person(4215, 'moshe', 24, 'rosh-ain');
 var provider = new Provider(32432, 'amit', 21, 'address');
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 var consumer1 = new Consumer(9654, 'itay', 24, 'rosh-ain');
 var consumer2 = new Consumer(3453, 'nadav', 24, 'rosh-ain');
 =======
+=======
+>>>>>>> e2fdf2a6c33ed332eb043d42c09fad98353265ef
 var consumer1 = new Person(9654, 'itay', 24, 'rosh-ain');
 var consumer2 = new Person(3453, 'nadav', 24, 'rosh-ain');
 var consumer3 = new Person(3256, 'sheena', 24, 'rosh-ain');

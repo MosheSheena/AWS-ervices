@@ -1,15 +1,15 @@
 const Person = require('./person');
-class Provider extends Person {
 
-  /**
-   * Class representing the provider of service, the one who
-   * sells the service and offers it to consumers.
-   * @param {Integer} id - passed to Parent class
-   * @param {String} fullName - passed to Parent class
-   * @param {Integer} age - passed to Parent class
-   * @param {String} address - passed to Parent class
-   * @param {Array.<Service>} servicesToProvide - array of service this provider is willing to offer.
-   */
+/**
+ * Class representing the provider of service, the one who sells the service and offers it to consumers.
+ *
+ * @param {Integer} id - passed to Parent class
+ * @param {String} fullName - passed to Parent class
+ * @param {Integer} age - passed to Parent class
+ * @param {String} address - passed to Parent class
+ * @param {Array.<Service>} servicesToProvide - array of service this provider is willing to offer.
+ */
+class Provider extends Person {
   constructor(id, fullName, age, address) {
     super(id, fullName, age, address);
     this._servicesToProvide = [];
@@ -28,11 +28,6 @@ class Provider extends Person {
     if (index > -1) {
       this._servicesToProvide.splice(index, 1);
     }
-  }
-  toJSON() {
-    return Object.assign(super.toJSON(), {
-        servicesToProvide: this._servicesToProvide
-    });
   }
 }
 

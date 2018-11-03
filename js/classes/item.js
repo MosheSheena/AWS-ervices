@@ -1,22 +1,23 @@
 const uuid = require('uuid');
 
-/**
- * A service is something, basically anything, that someone can offer to the public and other can buy it. Ex. provider can offer to bake 5 breads for anyone who is willing to pay for it.
- *
- * @param {String} description - describes what type of service this is
- * @param {Number} cost - the price of the service
- * @param {Integer} providerId - the id of the provider
- * @param {Date} timeToDeliver - deadline delivery
- * @param {Integer} quantity - how many times can the provider provide this service
- */
-class Service {
-    constructor(description, cost, providerId, timeToDeliver, quantity) {
+class Item {
+    constructor(name, category, cost, providerId, timeToDeliver, quantity) {
+
         this._id = uuid.v1();
-        this._description = description;
+        this._name = name;
+        this._category = category;
         this._cost = cost;
         this._providerId = providerId;
         this._timeToDeliver = timeToDeliver; //Date object
         this._quantity = quantity;
+    }
+
+    get name() {
+        return this._name;
+    }
+
+    get category() {
+        return this._category;
     }
 
     get id() {
@@ -24,7 +25,7 @@ class Service {
     }
 
     get description() {
-        return this._description;
+        return this._name;
     }
 
     get cost() {
@@ -56,6 +57,16 @@ class Service {
             this._quantity = quantity;
         }
     }
+
+    reduceAmount() {
+        if (this._quantity > 0) {
+            this._quantity--;
+
+            return true;
+        }
+
+        return false;
+    }
 }
 
-module.exports = Service;
+module.exports = Item;

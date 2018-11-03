@@ -57,8 +57,7 @@ class Transaction {
 }
 
 /*Functions*/
-function recordTransaction(transaction) {
-
+function recordTransaction(id, title, provider, consumer) {
     const params = {
         TableName: 'Transactions',
         Item: {
@@ -203,5 +202,3 @@ exports.handler = (event, context, callback) => {
         }
     });
 };
-
-
