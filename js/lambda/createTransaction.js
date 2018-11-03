@@ -129,6 +129,36 @@ async function getServiceQuantity(serviceId) {
     return s.Item.quantity;
 }
 
+/**
+ * Update service quantity in DB
+ *
+ * @param {String} serviceID - the id of the service
+ * @param {Integer} quantity - the new value for the quantity of the service available
+
+ * @returns {Promise} that can be hooked when we get a response from AWS
+ */
+function updateServiceQuantity(serviceID, quantity) {
+    var params = {
+        TableName: 'Services',
+        Key: {
+            'id': id
+        },
+        UpdateExpression: 'set quantity = :q',
+        ExpressionAttributeValues: {
+            ':q': quantity
+        },
+        ReturnValues: 'ALL_NEW'
+    };
+
+    return docClient.update(params, function (err, data) {
+        if (err) {
+            console.error('Unable to update item. Error JSON:', JSON.stringify(err, null, 2));
+        } else {
+            console.log('UpdateItem succeeded:', JSON.stringify(data, null, 2));
+        }
+    }).promise();
+}
+
 /*The lambda function*/
 exports.handler = (event, context, callback) => {
     //Checking if the Auth exists
@@ -156,41 +186,55 @@ exports.handler = (event, context, callback) => {
     getServiceQuantity(serviceId).then((availableQuantity) => {
         if ((availableQuantity - requestedServiceQuantity) >= 0) {
 
-            const transaction = Transaction(
-                serviceIdRequested, requestedServiceQuantity,
-                providerUN, consumerUN);
+            /*Updating the quantity in the DB*/
+            updateServiceQuantity(serviceIdRequested, requestedServiceQuantity).then(() => {
+                /*Once we've updated the quantity we can document the transaction*/
+                const transaction = Transaction(
+                    serviceIdRequested, requestedServiceQuantity,
+                    providerUN, consumerUN);
 
-            recordTransaction(transaction).then(() => {
-                // You can use the callback function to provide a return value from your Node.js
-                // Lambda functions. The first parameter is used for failed invocations. The
-                // second parameter specifies the result data of the invocation.
+                /*
+                When we're done with writing the trnasaction to the DB we can
+                return the response to the proxy
+                */
+                recordTransaction(transaction).then(() => {
+                    // You can use the callback function to provide a return value from your Node.js
+                    // Lambda functions. The first parameter is used for failed invocations. The
+                    // second parameter specifies the result data of the invocation.
 
-                // Because this Lambda function is called by an API Gateway proxy integration
-                // the result object must use the following structure.
-                callback(null, {
-                statusCode: CREATED,
-                    body: JSON.stringify({
-                    id: transaction.id,
-                    serviceID: transaction.serviceID,
-                    quantity: transaction.quantity,
-                    providerUN: transaction.providerUN,
-                    consumerUN: transaction.consumerUN,
-                    dateCreated: transaction.dateCreated
-                    }),
-                    headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    },
+                    // Because this Lambda function is called by an API Gateway proxy integration
+                    // the result object must use the following structure.
+                    callback(null, {
+                        statusCode: CREATED,
+                        body: JSON.stringify({
+                            id: transaction.id,
+                            serviceID: transaction.serviceID,
+                            quantity: transaction.quantity,
+                            providerUN: transaction.providerUN,
+                            consumerUN: transaction.consumerUN,
+                            dateCreated: transaction.dateCreated
+                        }),
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                        },
+                    });
+                }).catch((err) => {
+                    console.error(err);
+
+                    // If there is an error during processing, catch it and return
+                    // from the Lambda function successfully. Specify a 500 HTTP status
+                    // code and provide an error message in the body. This will provide a
+                    // more meaningful error response to the end client.
+                    errorResponse(err.message, context.awsRequestId, callback)
                 });
-            }).catch((err) => {
-                console.error(err);
-
-            // If there is an error during processing, catch it and return
-            // from the Lambda function successfully. Specify a 500 HTTP status
-            // code and provide an error message in the body. This will provide a
-            // more meaningful error response to the end client.
-            errorResponse(err.message, context.awsRequestId, callback)
             });
         }
+        /*
+        In case the requested quantity was not available to supply
+        we simply return a status code stating there was a conflict
+        between the request, and the inventory, and an appropriate
+        message stating this
+        */
         else {
             callback(null, {
                 statusCode: CONFLICT,
