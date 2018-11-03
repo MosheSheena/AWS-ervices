@@ -1,28 +1,22 @@
 const uuid = require('uuid');
 
-<<<<<<< HEAD
 /**
  * Class representing a successful transaction between a provider
  * and a consumer.
- * @param {String} title - a title describing the transaction
- * @param {Provider} provider - object containing provider data
- * @param {Consumer} consumer - object containing consumer data
+ *
+ * @param {String} serviceID - the ID of the service that is being bought
+ * @param {Integer} quantity - the quantity of service being bought
+ * @param {String} providerUN - object containing provider data
+ * @param {String} consumerUN - object containing consumer data
  */
 class Transaction {
-  constructor(title, provider, consumer) {
-    this._id = uuid.v1();
-    this._title = title;
-    this._provider = provider;
-    this._consumers = consumer;
-=======
-class Transaction {
-  constructor(title, provider, consumer) {
+  constructor(serviceID, quantity, providerUN, consumerUN) {
 
     this._id = uuid.v1();
-    this._title = title;
-    this._provider = provider;
-    this._consumer = consumer;
->>>>>>> [WIP] Adding lambda functions for business logic
+    this._serviceID = serviceID;
+    this._quantity = quantity;
+    this._providerUN = providerUN;
+    this._consumerUN = consumerUN;
     this._dateCreated = Date.now();
   }
 
@@ -30,55 +24,25 @@ class Transaction {
     return this._id;
   }
 
-  set title(title) {
-    this._title = title;
+  get serviceID() {
+    return this._serviceID;
   }
 
-  get title() {
-    return this._title;
+  get quantity() {
+      return this._quantity;
   }
 
-  get provider() {
-    return this._provider;
+  get providerUN() {
+    return this._providerUN;
   }
 
-  get consumer() {
-    return this._consumer;
+  get consumerUN() {
+    return this._consumerUN;
   }
 
   get dateCreated() {
     return this._dateCreated;
   }
-<<<<<<< HEAD
-  get dateExecuted() {
-    return this._dateExecuted;
-  }
-  /**
-   * Completed the agreed transaction between the provider and
-   * the consumer
-   * @returns {Boolean} indicating the success of the operation
-   */
-  execute() {
-    if (this._dateExecuted !== null) {
-      this._dateExecuted = Date.now();
-
-      return true;
-    }
-
-    return false;
-  }
-  toJSON() {
-    return {
-        id: this._id,
-        title: this._title,
-        provider: this._provider.toJSON(),
-        consumers: JSON.parse(JSON.stringify(this._consumers)),
-        dateCreated: this._dateCreated,
-        dateExecuted: this._dateExecuted
-    };
-  }
-=======
->>>>>>> [WIP] Adding lambda functions for business logic
 }
 
 module.exports = Transaction;
