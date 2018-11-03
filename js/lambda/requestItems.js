@@ -1,4 +1,4 @@
-/*<What does this file do>*/
+/*An AWS Lambda micro service meant to allow support for getting all available services*/
 
 /*AWS sdk module requirements*/
 const AWS = require('aws-sdk');
