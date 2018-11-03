@@ -179,7 +179,9 @@ function getTransactionsByTitle(title) {
 
 /**
  * Stores a service to DB
+ *
  * @param {Service} service - Service object to record
+ *
  * @returns {Promise} that holds the result of the operation
  */
 function recordService(service) {

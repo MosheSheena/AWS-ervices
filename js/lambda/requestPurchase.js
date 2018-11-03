@@ -141,7 +141,7 @@ function updateServiceQuantity(serviceID, quantity) {
     var params = {
         TableName: 'Services',
         Key: {
-            'id': id
+            'id': serviceID
         },
         UpdateExpression: 'set quantity = :q',
         ExpressionAttributeValues: {
@@ -189,9 +189,7 @@ exports.handler = (event, context, callback) => {
             /*Updating the quantity in the DB*/
             updateServiceQuantity(serviceIdRequested, requestedServiceQuantity).then(() => {
                 /*Once we've updated the quantity we can document the transaction*/
-                const transaction = Transaction(
-                    serviceIdRequested, requestedServiceQuantity,
-                    providerUN, consumerUN);
+                const transaction = new Transaction(serviceIdRequested, requestedServiceQuantity, providerUN, consumerUN);
 
                 /*
                 When we're done with writing the trnasaction to the DB we can
