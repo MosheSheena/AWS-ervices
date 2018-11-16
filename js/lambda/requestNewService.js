@@ -90,7 +90,7 @@ function recordService(service) {
         }
     };
 
-    return docClient.put(params, function (err, data) {
+    return ddb.put(params, function (err, data) {
         if (err) {
             console.error('Unable to add transaction. Error JSON:', JSON.stringify(err, null, 2));
         } else {
