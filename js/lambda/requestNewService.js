@@ -137,7 +137,7 @@ exports.handler = (event, context, callback) => {
     const timeToDeliver = requestBody.timeToDeliver;
     const quantity = requestBody.quantity;
 
-    const newService = new Service(description, cost, providerID, timeToDeliver, quantity);
+    const newService = new Service(description, cost, providerID, timeToDeliver, Number(quantity));
 
     recordService(newService).then(() => {
         callback(null, {
