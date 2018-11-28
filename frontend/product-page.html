@@ -39,22 +39,142 @@
                     <h2 class="text-info">Lets start</h2>
                     <p>Check out for the great products our members offering to sale.</p>
                 </div>
-<!---shown card-->
-                <div class="card">
-                  <img src="imgs/productcardpic.jpg" alt="Denim Jeans" style="width:100%">
-                  <h1>item name</h1>
-                  <p>provider id<p>
-                  <p class="price">$$$$</p>
-                  <p>Some text about the item..</p>
-                  <p><button>buy</button></p>
-                </div>
+              </div>
+            <!---shown card-->
 
-
+        </section>
+        <div id="showProducts"></div>
     </main>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!--
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
-    <script src="js/script.min.js"></script>
-</body>
+    <script src="js/script.min.js"></script>-->
+    <script>src="js/login.js"</script>
+    <script>src="register.html"</script>
 
+    <script>
+        var count= 0;
+        var ajaxConnections = 0;
+        var productsURL = _config.api.invokeUrl + "/products";
+        var purchaseURL = _config.api.invokeUrl + "/purchase";
+        var data = null;
+        var consumerEmail ="itaysoftware@gmail.com";
+
+        requestProducts();
+
+
+        $(document).ajaxComplete(function() {
+            if (ajaxConnections === 0){
+                addEventListenerToButtons();
+            }
+        });
+
+        function listenerHelper(index) {
+            document.getElementById("card"+ index).addEventListener("click", function(){
+                requestBuyProduct(data[index-1]);
+            });
+        }
+
+        function addEventListenerToButtons() {
+            ajaxConnections++;
+            var i;
+            for (i = 0; i < count; i++){
+                listenerHelper(i+1);
+                ajaxConnections--;
+            }
+        }
+
+        function requestProducts() {
+            count = 0;
+            var resultJSON = null;
+
+            $.ajax({
+                method: "GET",
+                url: productsURL,
+                beforeSend: function(xhr) {
+                    ajaxConnections++;
+                },
+            })
+                .done(function(json) {
+                    resultJSON = json["Items"];
+                    data = resultJSON;
+                    buildCards(resultJSON);
+                    ajaxConnections--;
+                })
+                .fail(function() {
+                    alert("Error requesting products");
+                    ajaxConnections--;
+                });
+        }
+
+        function buildCards(data) {
+
+            var cards = $();
+            // Store all the card nodes
+            data.forEach(function(item, i) {
+                cards = cards.add(createCard(item));
+            });
+
+            // Add them to the page... for instance the <body>
+            $(function() {
+                $("body").append(cards);
+            });
+        }
+
+
+        function createCard(cardData) {
+            ++count;
+            var cardId = "card" + count.toString();
+            var buttonId = "button" +count.toString();
+            var cardTemplate = [
+                '<div id='+ cardId+' class="card">',
+                '<p> Item No.', count, '</p>',
+                '<p>Price: ',
+                cardData.cost || 'Null',
+                '</p>',
+                '<p>Description: ',
+                cardData.description || 'No description provided',
+                '</p>',
+                '<p>Time to deliver: ',
+                cardData.timeToDeliver || 'No time mentioned',
+                '</p>',
+                '<p>Quantity: ',
+                cardData.quantity || 'No Quantity',
+                '</p>',
+                '<p><button id='+buttonId+'>buy',
+                '</button></p>',
+                '</div>'
+            ];
+
+            // a jQuery node
+            return $(cardTemplate.join(''));
+        }
+
+        // POST request for buying a product
+        function requestBuyProduct(productToBuy) {
+            var product = {
+                serviceID: productToBuy.id,
+                quantity: 1,
+                providerUN: productToBuy.providerId,
+                consumerUN: consumerEmail
+            };
+
+            var stringifyProduct = JSON.stringify(product);
+            $.ajax({
+                method: "POST",
+                url: purchaseURL,
+                data: stringifyProduct,
+            })
+                .done(function(msg) {
+                    alert("The purchase was made!");
+                })
+                .fail(function(errMsg) {
+                    alert("Error buying your product");
+                });
+
+        }
+
+
+
+</script>
+</body>
 </html>

@@ -9,18 +9,6 @@ const OK = 200;
 
 /*The lambda function*/
 exports.handler = (event, context, callback) => {
-    //Checking if the Auth exists
-    if (!event.requestContext.authorizer) {
-        errorResponse('Authorization not configured', context.awsRequestId, callback);
-        return;
-    }
-
-
-    // Because we're using a Cognito User Pools authorizer, all of the claims
-    // included in the authentication token are provided in the request context.
-    // This includes the username as well as other attributes.
-    const username = event.requestContext.authorizer.claims['cognito:username'];
-
     // The body field of the event in a proxy integration is a raw string.
     // In order to extract meaningful values, we need to first parse this string
     // into an object. A more robust implementation might inspect the Content-Type
