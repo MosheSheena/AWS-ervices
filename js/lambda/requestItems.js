@@ -13,7 +13,6 @@ exports.handler = (event, context, callback) => {
     // In order to extract meaningful values, we need to first parse this string
     // into an object. A more robust implementation might inspect the Content-Type
     // header first and use a different parsing strategy based on that value.
-    const requestBody = JSON.parse(event.body);
 
     getServicesForSell().then((servicesForSale) => {
         // You can use the callback function to provide a return value from your Node.js
