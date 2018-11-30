@@ -57,7 +57,7 @@ class Transaction {
 }
 
 /*Functions*/
-function recordTransaction(id, title, provider, consumer) {
+function recordTransaction(transaction) {
     const params = {
         TableName: 'Transactions',
         Item: {
@@ -106,7 +106,7 @@ function getServiceByID(id) {
         },
         ReturnValues: 'ALL_NEW'
     };
-    var res = docClient.get(params, function (err, data) {
+    var res = ddb.get(params, function (err, data) {
         if (err) {
             console.error('Unable to read item. Error JSON:', JSON.stringify(err, null, 2));
         } else {
@@ -150,7 +150,7 @@ function updateServiceQuantity(serviceID, quantity) {
         ReturnValues: 'ALL_NEW'
     };
 
-    return docClient.update(params, function (err, data) {
+    return ddb.update(params, function (err, data) {
         if (err) {
             console.error('Unable to update item. Error JSON:', JSON.stringify(err, null, 2));
         } else {
@@ -161,17 +161,6 @@ function updateServiceQuantity(serviceID, quantity) {
 
 /*The lambda function*/
 exports.handler = (event, context, callback) => {
-    //Checking if the Auth exists
-    if (!event.requestContext.authorizer) {
-        errorResponse('Authorization not configured', context.awsRequestId, callback);
-        return;
-    }
-
-    // Because we're using a Cognito User Pools authorizer, all of the claims
-    // included in the authentication token are provided in the request context.
-    // This includes the username as well as other attributes.
-    const username = event.requestContext.authorizer.claims['cognito:username'];
-
     // The body field of the event in a proxy integration is a raw string.
     // In order to extract meaningful values, we need to first parse this string
     // into an object. A more robust implementation might inspect the Content-Type
@@ -183,16 +172,16 @@ exports.handler = (event, context, callback) => {
     const providerUN = requestBody.providerUN;
     const consumerUN = requestBody.consumerUN;
 
-    getServiceQuantity(serviceId).then((availableQuantity) => {
+    getServiceQuantity(serviceIdRequested).then((availableQuantity) => {
         if ((availableQuantity - requestedServiceQuantity) >= 0) {
 
             /*Updating the quantity in the DB*/
-            updateServiceQuantity(serviceIdRequested, requestedServiceQuantity).then(() => {
+            updateServiceQuantity(serviceIdRequested, (availableQuantity - requestedServiceQuantity)).then(() => {
                 /*Once we've updated the quantity we can document the transaction*/
                 const transaction = new Transaction(serviceIdRequested, requestedServiceQuantity, providerUN, consumerUN);
 
                 /*
-                When we're done with writing the trnasaction to the DB we can
+                When we're done with writing the transaction to the DB we can
                 return the response to the proxy
                 */
                 recordTransaction(transaction).then(() => {

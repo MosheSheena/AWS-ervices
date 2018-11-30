@@ -25,7 +25,7 @@ class Service {
         this._description = description;
         this._cost = cost;
         this._providerId = providerId;
-        this._timeToDeliver = timeToDeliver; //Date object
+        this._timeToDeliver = timeToDeliver;
         this._quantity = quantity;
     }
 
@@ -90,7 +90,7 @@ function recordService(service) {
         }
     };
 
-    return docClient.put(params, function (err, data) {
+    return ddb.put(params, function (err, data) {
         if (err) {
             console.error('Unable to add transaction. Error JSON:', JSON.stringify(err, null, 2));
         } else {
@@ -114,17 +114,6 @@ function errorResponse(errorMessage, awsRequestId, callback) {
 
 /*The lambda function*/
 exports.handler = (event, context, callback) => {
-    //Checking if the Auth exists
-    if (!event.requestContext.authorizer) {
-        errorResponse('Authorization not configured', context.awsRequestId, callback);
-        return;
-    }
-
-    // Because we're using a Cognito User Pools authorizer, all of the claims
-    // included in the authentication token are provided in the request context.
-    // This includes the username as well as other attributes.
-    const username = event.requestContext.authorizer.claims['cognito:username'];
-
     // The body field of the event in a proxy integration is a raw string.
     // In order to extract meaningful values, we need to first parse this string
     // into an object. A more robust implementation might inspect the Content-Type
@@ -133,11 +122,11 @@ exports.handler = (event, context, callback) => {
 
     const description = requestBody.description;
     const cost = requestBody.cost;
-    const providerID = requestBody.providerId;
+    const providerId = requestBody.providerId;
     const timeToDeliver = requestBody.timeToDeliver;
-    const quantity = requestBody.quantity;
+    const quantity = Number(requestBody.quantity);
 
-    const newService = new Service(description, cost, providerID, timeToDeliver, quantity);
+    const newService = new Service(description, cost, providerId, timeToDeliver, quantity);
 
     recordService(newService).then(() => {
         callback(null, {

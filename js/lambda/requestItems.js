@@ -9,27 +9,12 @@ const OK = 200;
 
 /*The lambda function*/
 exports.handler = (event, context, callback) => {
-    //Checking if the Auth exists
-    if (!event.requestContext.authorizer) {
-        errorResponse('Authorization not configured', context.awsRequestId, callback);
-        return;
-    }
-
-
-    // Because we're using a Cognito User Pools authorizer, all of the claims
-    // included in the authentication token are provided in the request context.
-    // This includes the username as well as other attributes.
-    const username = event.requestContext.authorizer.claims['cognito:username'];
-
     // The body field of the event in a proxy integration is a raw string.
     // In order to extract meaningful values, we need to first parse this string
     // into an object. A more robust implementation might inspect the Content-Type
     // header first and use a different parsing strategy based on that value.
-    const requestBody = JSON.parse(event.body);
 
-    const unicorn = findUnicorn(pickupLocation);
-
-    getServicesForSell().then((value) => {
+    getServicesForSell().then((servicesForSale) => {
         // You can use the callback function to provide a return value from your Node.js
         // Lambda functions. The first parameter is used for failed invocations. The
         // second parameter specifies the result data of the invocation.
@@ -38,7 +23,7 @@ exports.handler = (event, context, callback) => {
         // the result object must use the following structure.
         callback(null, {
             statusCode: OK,
-            body: JSON.stringify(value),
+            body: JSON.stringify(servicesForSale),
             headers: {
                 'Access-Control-Allow-Origin': '*',
             },
@@ -57,8 +42,8 @@ exports.handler = (event, context, callback) => {
 function getServicesForSell() {
     const params = {
         TableName: 'Services',
-        ProjectionExpression: '#sid, description, cost, provider, timeToDeliver, quantity',
-        FilterExpression: 'quantity >= :expect_quantity',
+        ProjectionExpression: '#sid, description, cost, providerId, quantity, timeToDeliver',
+        FilterExpression: 'quantity > :expect_quantity',
         ExpressionAttributeNames: {
             '#sid': 'id'
         },
@@ -81,4 +66,28 @@ function errorResponse(errorMessage, awsRequestId, callback) {
             'Access-Control-Allow-Origin': '*',
         },
     });
+}
+
+/**
+ * Callback for scanning the DB.
+ * @param {Object} err - error object
+ * @param {Object} data - response data containing the Items we scanned for.
+ * @returns {undefined}
+ */
+function onScan(err, data) {
+    if (err) {
+        console.error('Unable to scan the table. Error JSON:', JSON.stringify(err, null, 2));
+    } else {
+        console.log('Scan succeeded.');
+
+        /*
+         * Continue scanning if we have more movies, because
+         * scan can retrieve a maximum of 1MB of data
+         */
+        if (typeof data.LastEvaluatedKey != 'undefined') {
+            console.log('Scanning for more...');
+            params.ExclusiveStartKey = data.LastEvaluatedKey;
+            ddb.scan(params, onScan);
+        }
+    }
 }
