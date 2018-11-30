@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/js/dynamoDB/test_dynamo.js"
+            "program": "${workspaceFolder}/js/sqs/messageReciever.js"
         },
         {
             "type": "node",
