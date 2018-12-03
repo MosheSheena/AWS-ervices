@@ -14,12 +14,11 @@ function recordTransaction(transaction) {
     const params = {
         TableName: 'Transactions',
         Item: {
-            'id': { S: transaction._id },
-            'serviceID': { S: transaction._serviceID },
-            'quantity': { N: '' + transaction._quantity },
-            'providerUN': { S: transaction._providerUN },
-            'consumerUN': { S: transaction._consumerUN },
-            'dateCreated': { N: '' + transaction._dateCreated }
+            'id': { S: transaction.id },
+            'serviceID': { S: transaction.serviceID },
+            'quantity': { N: '' + transaction.quantity },
+            'providerUN': { S: transaction.providerUN },
+            'dateCreated': { N: '' + transaction.dateCreated }
         }
     };
 
