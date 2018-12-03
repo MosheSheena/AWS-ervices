@@ -5,22 +5,25 @@ AWS.config.update({
 
 var sqs = new AWS.SQS();
 
-var queueURL = 'https://sqs.us-east-1.amazonaws.com/821023756204/test_queue';
-const ddb = new AWS.DynamoDB.DocumentClient();
+var queueURL = 'https://sqs.us-east-1.amazonaws.com/827488408719/AW-services';
+const ddb = new AWS.DynamoDB();
 
 
 function recordTransaction(transaction) {
+    console.log('transaction=' + JSON.stringify(transaction));
     const params = {
         TableName: 'Transactions',
         Item: {
-            'id': transaction.id,
-            'serviceID': transaction.serviceID,
-            'quantity': transaction.quantity,
-            'providerUN': transaction.providerUN,
-            'consumerUN': transaction.consumerUN,
-            'dateCreated': transaction.dateCreated
+            'id': { S: transaction._id },
+            'serviceID': { S: transaction._serviceID },
+            'quantity': { N: '' + transaction._quantity },
+            'providerUN': { S: transaction._providerUN },
+            'consumerUN': { S: transaction._consumerUN },
+            'dateCreated': { N: '' + transaction._dateCreated }
         }
     };
+
+    console.log(JSON.stringify(params, null, 2));
 
     return ddb.put(params, function (err, data) {
         if (err) {

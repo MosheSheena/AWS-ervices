@@ -5,7 +5,7 @@ AWS.config.update({
 
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
-var queueURL = 'https://sqs.us-east-1.amazonaws.com/821023756204/test_queue';
+var queueURL = 'https://sqs.us-east-1.amazonaws.com/827488408719/AW-services';
 
 var params = {
  DelaySeconds: 10,
