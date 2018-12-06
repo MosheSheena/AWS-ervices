@@ -10,6 +10,12 @@ const CREATED = 201;
 const CONFLICT = 409;
 const UNAVAILABLE_QUANTITY_MSG = "the request cannot be completed since the requested quantity is not available in inventory";
 
+/*Variables*/
+const queueUrl = "";
+
+// Instantiate SQS.
+var sqs = new AWS.SQS();
+
 /*Classes*/
 /**
  * Class representing a successful transaction between a provider
@@ -180,39 +186,43 @@ exports.handler = (event, context, callback) => {
                 /*Once we've updated the quantity we can document the transaction*/
                 const transaction = new Transaction(serviceIdRequested, requestedServiceQuantity, providerUN, consumerUN);
 
+                /*Preparing the message to be sent to the queue*/
+                const messageParams = {
+                    MessageBody: JSON.stringify(transaction),
+                    QueueUrl: queueUrl,
+                    DelaySeconds: 0
+                };
+
+                var statusCodeToReturn = CREATED;
+
+                /*Sending the message to the queue*/
+                sqs.sendMessage(messageParams, function (err, data) {
+                    if(err) {
+                        //Sending the message was unsuccessful
+                        statusCodeToReturn = CONFLICT;
+                    }
+                    else {
+                        /*Do nothing since the message was sent*/
+                    }
+                });
+
                 /*
                 When we're done with writing the transaction to the DB we can
                 return the response to the proxy
                 */
-                recordTransaction(transaction).then(() => {
-                    // You can use the callback function to provide a return value from your Node.js
-                    // Lambda functions. The first parameter is used for failed invocations. The
-                    // second parameter specifies the result data of the invocation.
-
-                    // Because this Lambda function is called by an API Gateway proxy integration
-                    // the result object must use the following structure.
-                    callback(null, {
-                        statusCode: CREATED,
-                        body: JSON.stringify({
-                            id: transaction.id,
-                            serviceID: transaction.serviceID,
-                            quantity: transaction.quantity,
-                            providerUN: transaction.providerUN,
-                            consumerUN: transaction.consumerUN,
-                            dateCreated: transaction.dateCreated
-                        }),
-                        headers: {
-                            'Access-Control-Allow-Origin': '*',
-                        },
-                    });
-                }).catch((err) => {
-                    console.error(err);
-
-                    // If there is an error during processing, catch it and return
-                    // from the Lambda function successfully. Specify a 500 HTTP status
-                    // code and provide an error message in the body. This will provide a
-                    // more meaningful error response to the end client.
-                    errorResponse(err.message, context.awsRequestId, callback)
+                callback(null, {
+                    statusCode: statusCodeToReturn,
+                    body: JSON.stringify({
+                        id: transaction.id,
+                        serviceID: transaction.serviceID,
+                        quantity: transaction.quantity,
+                        providerUN: transaction.providerUN,
+                        consumerUN: transaction.consumerUN,
+                        dateCreated: transaction.dateCreated
+                    }),
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                    },
                 });
             });
         }
